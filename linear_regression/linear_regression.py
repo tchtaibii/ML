@@ -25,8 +25,8 @@ try:
         reader = csv.reader(file)
         next(reader)  # Skip header
         for row in reader:
-            x.append(int(row[0]))
-            y.append(int(row[1]))
+            x.append(float(row[0]))
+            y.append(float(row[1]))
     slope = calculate_slope(x, y)
     y_intercept = calculate_y_intercept(y, x, slope)
     linear_regression = slope * float_number + y_intercept
