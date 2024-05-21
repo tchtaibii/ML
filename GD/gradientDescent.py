@@ -1,7 +1,8 @@
 import csv
 import numpy as np
-from PIL import Image, ImageDraw
 import math
+import matplotlib.pyplot as plt
+
 
 def fn_hypothesis(w, b, x):
     return w * x + b
@@ -28,7 +29,6 @@ def gradient_descent(X, Y, w, b, learning_rate, num_iterations):
 
         # if i % 100 == 0:  # Print cost every 100 iterations
         #     print(f"Iteration {i+1}: Cost {cost}")
-
     return w, b, cost_history
 
 try:
@@ -57,28 +57,7 @@ try:
     
     # Perform gradient descent
     w, b, cost_history = gradient_descent(X_norm, Y, w, b, learning_rate, num_iterations)
-    
-    img_width = 800
-    img_height = 600
-    img = Image.new('RGB', (img_width, img_height), color='white')
-    draw = ImageDraw.Draw(img)
-
-    # Plot the data points
-    scaled_X = (X_norm - X_norm.min()) / (X_norm.max() - X_norm.min()) * img_width
-    scaled_Y = (Y - Y.min()) / (Y.max() - Y.min()) * img_height
-    for x, y in zip(scaled_X, scaled_Y):
-        draw.ellipse((x - 3, y - 3, x + 3, y + 3), fill='blue')
-
-    # Plot the regression line
-    x_values = np.linspace(scaled_X.min(), scaled_X.max(), 100)
-    y_values = w * (x_values / img_width) * (X.max() - X.min()) / X_std + b
-    scaled_y_values = (y_values - Y.min()) / (Y.max() - Y.min()) * img_height
-    for i in range(len(scaled_y_values) - 1):
-        draw.line((x_values[i], scaled_y_values[i], x_values[i + 1], scaled_y_values[i + 1]), fill='red')
-
-    # Save the image
-    img.save('linear_regression_plot.png')
-        
+            
     # Final parameters
     print(f"Final weight: {w}, Final bias: {b}")
     
@@ -87,6 +66,34 @@ try:
     new_km_norm = (new_km - X_mean) / X_std
     predicted_price = fn_hypothesis(w, b, new_km_norm)
     print(f"Predicted price for {new_km} km: {predicted_price}")
+
+    Y_pred = fn_hypothesis(w, b, X_norm)
+    
+    # Calculate R² score
+    SS_tot = np.sum((Y - np.mean(Y)) ** 2)
+    SS_res = np.sum((Y - Y_pred) ** 2)
+    r2_score = 1 - (SS_res / SS_tot)
+    r2_percentage = r2_score * 100
+
+    print(f"R² Score: {r2_score}")
+    print(f"Model Precision: {r2_percentage}%")
+
+    plt.figure(figsize=(10, 6))
+    
+    # Plot the original data points
+    plt.scatter(X, Y, color='blue', label='Original data')
+    
+    # Plot the regression line
+    X_range = np.linspace(min(X), max(X), 100)
+    X_range_norm = (X_range - X_mean) / X_std
+    Y_range_pred = fn_hypothesis(w, b, X_range_norm)
+    plt.plot(X_range, Y_range_pred, color='red', label='Regression line')
+    
+    plt.xlabel('Kilometers')
+    plt.ylabel('Price')
+    plt.title('Linear Regression Model')
+    plt.legend()
+    plt.show()
     
 except ValueError:
     print("Error: Argument passed is not a valid float number")
